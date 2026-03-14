@@ -46,7 +46,7 @@ def sanitize_request(request: Any) -> Any:
         try:
             body = request.body.decode("utf8")
         except UnicodeDecodeError:
-            return request  # leave as-is; binary bodies not sanitized
+            pass
         else:
             for key in ["username", "password", "refresh_token"]:
                 body = re.sub(key + r"=[^&]*", f"{key}=SANITIZED", body)
@@ -115,7 +115,7 @@ def sanitize_response(response: Any) -> Any:
             if field in body_json:
                 body_json[field] = "SANITIZED"
 
-        # Sanitize personal identifying information
+        # Sanitize personal identifying information (including IDs used in API paths)
         for field in [
             "displayName",
             "fullName",
@@ -123,6 +123,8 @@ def sanitize_response(response: Any) -> Any:
             "profileImageUrlMedium",
             "profileImageUrlSmall",
             "userProfileId",
+            "garminGUID",
+            "profileId",
             "emailAddress",
         ]:
             if field in body_json:
