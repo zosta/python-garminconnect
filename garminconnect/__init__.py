@@ -251,6 +251,7 @@ class Garmin:
             "/wellness-service/wellness/daily/im"
         )
         self.garmin_daily_events_url = "/wellness-service/wellness/dailyEvents"
+        self.garmin_connect_calendar_events_url = "/calendar-service/events"
         self.garmin_connect_activities = (
             "/activitylist-service/activities/search/activities"
         )
@@ -1304,6 +1305,31 @@ class Garmin:
         logger.debug("Requesting all day events data")
 
         return self.connectapi(url)
+
+    def get_upcoming_race_events(
+        self,
+        start_date: str,
+        limit: int = 20,
+    ) -> list[dict[str, Any]]:
+        """Return upcoming race events from the user's calendar.
+
+        Returns events with name, date, location, completionTarget, customGoal,
+        projectedRaceTimeDurationSeconds, predictedRaceTimeDurationSeconds,
+        and isPrimaryEvent flag.
+
+        Keyword Arguments:
+        'start_date' earliest event date in 'YYYY-MM-DD' format
+        'limit' maximum number of events to return (default 20)
+        """
+        start_date = _validate_date_format(start_date, "start_date")
+        params = {
+            "startDate": start_date,
+            "pageIndex": 1,
+            "limit": limit,
+            "sortOrder": "eventDate_asc",
+        }
+        logger.debug("Requesting upcoming race events from %s", start_date)
+        return self.connectapi(self.garmin_connect_calendar_events_url, params=params)
 
     def get_personal_record(self) -> dict[str, Any]:
         """Return personal records for current user."""
